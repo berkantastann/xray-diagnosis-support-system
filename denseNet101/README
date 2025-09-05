@@ -1,0 +1,38 @@
+Bu notebook, göğüs röntgeni görüntülerinin derin öğrenme tabanlı çoklu etiket sınıflandırması için geliştirilmiş bir Jupyter Notebook ve destekleyici dosyaları içermektedir.
+Model, aşağıdaki makaleden ilham alınarak ve kısmen bu makaledeki yöntemler temel alınarak geliştirilmiştir:
+
+> **Aravind Sasidharan Pillai**
+> *Multi-Label Chest X-Ray Classification via Deep Learning*
+> University of Illinois Urbana-Champaign, Champaign, IL, USA.
+> Journal of Intelligent Learning Systems and Applications, Cilt 14, No. 4, 2022
+> DOI: [10.4236/jilsa.2022.144004](https://doi.org/10.4236/jilsa.2022.144004)
+
+---
+
+## Model Özeti
+Bu modelin amacı, göğüs röntgeni görüntülerinden **14 farklı göğüs hastalığını** tespit edebilen hafif bir çözüm geliştirmektir.
+
+Öne çıkan noktalar:
+- Göğüs röntgeni için **çoklu etiket sınıflandırma**
+- Stanford ML Group’un CheXpert çalışması baz alınarak 5 hastalıktan 14 hastalığa genişletme
+- Radyologlara bilgisayarlı tanı desteği sağlayabilecek bir sistem prototipi
+
+---
+## Referans
+
+Notebook benim projem için üzerinde ekleme ve çıkarma yaptığım bir model içermektedir. Orjinal model için makaleye göz atınız.
+
+Bu depodaki notebook’u kendi çalışmalarınızda kullanmak isterseniz, lütfen aşağıdaki makaleyi kaynak gösteriniz:
+
+```bibtex
+@article{pillai2022multilabel,
+  title={Multi-Label Chest X-Ray Classification via Deep Learning},
+  author={Pillai, Aravind Sasidharan},
+  journal={Journal of Intelligent Learning Systems and Applications},
+  volume={14},
+  number={4},
+  pages={59-77},
+  year={2022},
+  doi={10.4236/jilsa.2022.144004},
+  publisher={Scientific Research Publishing}
+}

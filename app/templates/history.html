@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-clock-history"></i> Geçmiş Tahminler
+        </h5>
+        <div class="search-box">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" id="searchInput" placeholder="Hasta ismine göre ara...">
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if images %}
+            <div class="list-group list-group-flush" id="historyList">
+                {% for image in images %}
+                    <div class="list-group-item history-item p-3" data-patient-name="{{ image.patient_name|default('', true)|lower }}">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="image-wrapper">
+                                <img src="data:image/jpeg;base64,{{ image.image_data_base64 }}" 
+                                         class="img-fluid rounded history-image" 
+                                         alt="X-Ray görüntüsü"
+                                         data-bs-toggle="modal"
+                                         data-bs-target="#imageModal"
+                                         onclick="showImage(this.src)">
+                                    <div class="image-overlay">
+                                        <div class="image-overlay-content">
+                                            <i class="bi bi-zoom-in"></i>
+                                            <p>Büyüt</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="mb-0 me-2">{{ image.filename }}</h6>
+                                {% if image.patient_name %}
+                                    <span class="badge bg-primary">
+                                    <i class="bi bi-person"></i> {{ image.patient_name }}
+                                    </span>
+                                {% endif %}
+                                </div>
+                                <p class="text-muted small mb-2">
+                                    <i class="bi bi-calendar"></i> {{ image.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                </p>
+                                <div class="predictions-container">
+                                    <div class="row g-2">
+                                    {% for label in image.labels|sort(attribute='confidence', reverse=true) %}
+                                            <div class="col-12">
+                                                <div class="prediction-item">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input prediction-checkbox" 
+                                                               type="checkbox" 
+                                                               name="confirmed_{{ image.id }}" 
+                                                               value="{{ label.disease_name }}"
+                                                               {% if label.is_confirmed %}checked{% endif %}>
+                                                        <label class="form-check-label">
+                                                            <span>{{ label.disease_name }}</span>
+                                                            <span class="confidence {% if label.confidence > 0.5 %}confidence-high{% elif label.confidence > 0.2 %}confidence-medium{% else %}confidence-low{% endif %}">
+                                                                {{ (label.confidence * 100)|round(1) }}%
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="progress">
+                                                        <div class="progress-bar {% if label.confidence > 0.5 %}bg-high{% elif label.confidence > 0.2 %}bg-medium{% else %}bg-low{% endif %}" 
+                                                             role="progressbar" 
+                                                             style="width: {{ (label.confidence * 100)|round(1) }}%" 
+                                                             aria-valuenow="{{ (label.confidence * 100)|round(1) }}" 
+                                                             aria-valuemin="0" 
+                                                             aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    {% endfor %}
+                                    </div>
+                                </div>
+                                {% if image.llm_report %}
+                                    <div class="mt-2">
+                                        <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#report-{{ image.id }}">
+                                            <i class="bi bi-file-text"></i> Raporu Göster/Gizle
+                                        </button>
+                                        <div class="collapse mt-2" id="report-{{ image.id }}">
+                                            <div class="card card-body bg-light">
+                                                <div class="report-content small">
+                                                    {{ image.llm_report|nl2br|safe }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex flex-column h-100">
+                                    <div class="mb-2">
+                                        <button class="btn btn-success saved-button w-100"
+                                        data-image-id="{{ image.id }}"
+                                        style="display: {% if image.labels|selectattr('is_confirmed')|list|length > 0 %}block{% else %}none{% endif %};">
+                                    <i class="bi bi-check-circle-fill"></i> Kaydedildi
+                                </button>
+                                        <button class="btn btn-outline-primary save-prediction w-100"
+                                        data-image-id="{{ image.id }}"
+                                        style="display: none;">
+                                    <i class="bi bi-check-circle"></i> Seçili Tahminleri Kaydet
+                                </button>
+                            </div>
+                                    <div class="doctor-comment-section mt-2">
+                                        <h6 class="small mb-2">Doktor Yorumu:</h6>
+                                        {% if image.doctor_comments %}
+                                            <div class="comment-content small bg-light p-2 rounded" id="comment-content-{{ image.id }}">
+                                                {{ image.doctor_comments|sort(attribute='updated_at', reverse=true)|first|attr('comment')|nl2br|safe }}
+                                            </div>
+                                            <div class="comment-edit-form" id="comment-edit-form-{{ image.id }}" style="display: none;">
+                                                <textarea class="form-control form-control-sm mb-2" id="comment-edit-{{ image.id }}" rows="2">{{ image.doctor_comments|sort(attribute='updated_at', reverse=true)|first|attr('comment') }}</textarea>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-primary btn-sm" onclick="saveComment({{ image.id }})">Kaydet</button>
+                                                    <button class="btn btn-secondary btn-sm" onclick="cancelEdit({{ image.id }})">İptal</button>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm mt-2" onclick="editComment({{ image.id }})">
+                                                <i class="bi bi-pencil"></i> Düzenle
+                                            </button>
+                                        {% else %}
+                                            <div class="comment-content small bg-light p-2 rounded" id="comment-content-{{ image.id }}" style="display: none;">
+                                            </div>
+                                            <div class="comment-edit-form" id="comment-edit-form-{{ image.id }}">
+                                                <textarea class="form-control form-control-sm mb-2" id="comment-edit-{{ image.id }}" rows="2" placeholder="Yorumunuzu buraya yazın..."></textarea>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-primary btn-sm" onclick="saveComment({{ image.id }})">Kaydet</button>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-inbox display-4"></i>
+                <p class="mt-3">Henüz tahmin yapılmamış</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">X-Ray Görüntüsü</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img src="" class="img-fluid modal-image" id="modalImage">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Arama fonksiyonu
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchText = e.target.value.toLowerCase();
+    const historyItems = document.querySelectorAll('.history-item');
+    
+    historyItems.forEach(item => {
+        const patientName = item.dataset.patientName;
+        if (patientName.includes(searchText)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Görüntü büyütme fonksiyonu
+document.querySelectorAll('.history-image').forEach(img => {
+    img.addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        document.getElementById('modalImage').src = this.src;
+        modal.show();
+    });
+});
+
+function editComment(imageId) {
+    document.getElementById(`comment-content-${imageId}`).style.display = 'none';
+    document.getElementById(`comment-edit-form-${imageId}`).style.display = 'block';
+}
+
+function cancelEdit(imageId) {
+    document.getElementById(`comment-content-${imageId}`).style.display = 'block';
+    document.getElementById(`comment-edit-form-${imageId}`).style.display = 'none';
+}
+
+async function saveComment(imageId) {
+    const comment = document.getElementById(`comment-edit-${imageId}`).value;
+    
+    try {
+        const response = await fetch('/save_comment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                image_id: imageId,
+                comment: comment
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById(`comment-content-${imageId}`).innerHTML = comment.replace(/\n/g, '<br>');
+            document.getElementById(`comment-content-${imageId}`).style.display = 'block';
+            document.getElementById(`comment-edit-form-${imageId}`).style.display = 'none';
+        } else {
+            alert(data.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+        }
+    } catch (error) {
+        alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+}
+
+function showImage(src) {
+    const modalImage = document.getElementById('modalImage');
+    modalImage.src = src;
+}
+</script>
+{% endblock %} 

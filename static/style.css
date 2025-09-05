@@ -1,0 +1,93 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    margin-bottom: 2rem;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.progress {
+    height: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.progress-bar {
+    background-color: #0d6efd;
+}
+
+.predictions-list {
+    margin-top: 1rem;
+}
+
+.prediction-item {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #f8f9fa;
+}
+
+.prediction-item.confirmed {
+    background-color: #e8f5e9;
+}
+
+.disease-name {
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.confidence {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.llm-report {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.llm-report h1,
+.llm-report h2,
+.llm-report h3,
+.llm-report h4,
+.llm-report h5,
+.llm-report h6 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.llm-report ul,
+.llm-report ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.llm-report p {
+    margin-bottom: 0.75rem;
+}
+
+.llm-report strong {
+    font-weight: 600;
+}
+
+.llm-report em {
+    font-style: italic;
+} 

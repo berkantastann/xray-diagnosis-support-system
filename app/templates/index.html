@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Sol: Hastalık Tahminleri -->
+    <div class="col-lg-4">
+        <div class="card shadow prediction-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> Hastalık Tahminleri
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="predictions">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-arrow-up-circle display-4"></i>
+                        <p class="mt-3">X-Ray görüntüsü yükleyerek tahminleri görüntüleyin</p>
+                    </div>
+                </div>
+                <div id="savePredictionsArea" style="display: none;">
+                    <hr>
+                    <button type="button" class="btn btn-success w-100" id="savePredictionsBtn">
+                        <i class="bi bi-check-circle"></i> Seçili Tahminleri Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orta: Görüntü Yükleme -->
+    <div class="col-lg-4">
+        <div class="card shadow upload-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-cloud-upload"></i> X-Ray Görüntüsü
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="error"></div>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="image-container">
+                        <div class="image-wrapper" onclick="document.getElementById('file').click()">
+                            <img id="previewImage" src="" class="uploaded-xray" alt="Yüklenen X-Ray görüntüsü" style="display: none;">
+                            <div id="uploadPlaceholder" class="upload-placeholder">
+                                <i class="bi bi-cloud-upload"></i>
+                                <p>Görüntü seçin</p>
+                                <small>PNG, JPG veya JPEG</small>
+                            </div>
+                            <div class="image-overlay">
+                                <div class="image-overlay-content">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <p>Değiştir</p>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" class="d-none" id="file" name="file" accept="image/*" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="patientName" class="form-label">Hasta İsmi</label>
+                        <input type="text" class="form-control" id="patientName" name="patient_name" placeholder="Hasta ismini giriniz">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="doctorComment" class="form-label">Doktor Yorumu</label>
+                        <textarea class="form-control" id="doctorComment" name="doctor_comment" rows="3" placeholder="Hasta hakkında yorumunuzu yazınız"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" id="predictButton">
+                        <i class="bi bi-lightning-charge"></i> Tahmin Et
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sağ: LLM Raporu -->
+    <div class="col-lg-4">
+        <div class="card shadow report-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-file-text"></i> Tıbbi Rapor
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="report">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-file-earmark-text display-4"></i>
+                        <p class="mt-3">Tahmin sonuçlarına göre rapor burada görüntülenecek</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="currentImageId" value="">
+{% endblock %} 
